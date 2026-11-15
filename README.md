@@ -1,10 +1,10 @@
 # Blinded title & abstract screening
 
-A small website for two reviewers to screen titles and abstracts independently.
+A small website for assessors to screen titles and abstracts independently. You can set up **any number of assessors**; **each record is screened by exactly two** of them.
 
-- **Reviewers** open a web page (hosted free on GitHub Pages), sign in with a personal access code, and mark each record **Include / Maybe / Exclude**.
-- **Blinding:** each reviewer's browser only ever receives the records and *their own* decisions. The other reviewer's decisions are never sent to it.
-- **Results** are written to a Google Sheet owned by an **independent person**, who is the only one with access. They can see both reviewers' decisions side by side, conflicts, percent agreement and Cohen's kappa.
+- **Assessors** open a web page (hosted free on GitHub Pages), sign in with a personal access code, and mark each record **Include / Maybe / Exclude**. They only see the records assigned to them.
+- **Blinding:** an assessor's browser only ever receives their own assigned records and *their own* decisions. The other assessor's decisions, and who that assessor is, are never sent to it.
+- **Results** are written to a Google Sheet owned by an **independent person**, who is the only one with access. They can see each record's two decisions side by side, conflicts, workload, percent agreement and Cohen's kappa.
 
 ```
 Reviewer browser  ──(access code)──▶  Google Apps Script web app  ──▶  Google Sheet
@@ -39,17 +39,27 @@ Create a new Google Sheet **with the independent person's Google account**. Do n
 **Screening → 1. Set up sheets** (approve the permissions the first time). This creates:
 
 - `Records`: one row per record
-- `Reviewers`: two reviewers with randomly generated access codes
+- `Reviewers`: one row per assessor, with a randomly generated access code (it starts with `R1` and `R2`)
 - `Decisions`: the append-only log of every decision
 
-Edit the reviewer names in `Reviewers` if you like. Keep the IDs (`R1`, `R2`) and the first two rows as the two reviewers.
+**Add all your assessors** to `Reviewers`: type a unique ID (`R3`, `R4`, …) and a name on each new row, then run **Screening → 2. Generate missing access codes**. Any number is fine.
 
 ### 4. Add the records
 Paste or import your records into `Records` with these columns:
 
-`record_id | title | abstract | authors | year | journal | doi`
+`record_id | title | abstract | authors | year | journal | doi | assessor_1 | assessor_2`
 
 `record_id` must be unique. Only `record_id` and `title` are essential. You can export this from a reference manager (Zotero, EndNote, Rayyan, Covidence, etc.) as CSV and map the columns. `sample-records.csv` shows the layout.
+
+### 4b. Assign two assessors to each record
+The last two columns hold the reviewer IDs of the two assessors for that record. Either:
+
+- **Automatic:** leave them blank and run **Screening → 3. Assign two assessors to unassigned records**. Each record gets two different assessors and the workload is kept even.
+- **By hand:** type the IDs yourself (for example `R1` and `R4`). You can mix both: records that already have an assignment are left alone.
+
+Do this **before screening starts**. It never reassigns a record that already has decisions. If both assessor cells are left blank and you never run the assignment, the record is screened by the first two assessors in `Reviewers`, as in a simple two-person review.
+
+An ID that doesn't match a row in `Reviewers`, or two identical IDs on one record, shows as `Check assignment` in the summary, and nobody will see that record until it is fixed.
 
 ### 5. Deploy the web app
 1. In Apps Script: **Deploy → New deployment → type: Web app**.
@@ -74,6 +84,7 @@ Send each reviewer the site URL and **their own** access code from the `Reviewer
 ## Using the website
 
 - **I / M / E** keys record Include / Maybe / Exclude. **← →** move between records. **N** jumps to the next unscreened record.
+- Excluding a record **requires a reason** from the dropdown (set the list in `config.js`). Clicking Exclude without one saves nothing and highlights the dropdown. The backend enforces this too.
 - A reviewer can change an earlier decision. Every change is added to the `Decisions` log with a timestamp, and the latest one counts.
 - Optional keyword highlighting is stored only in the reviewer's own browser.
 
@@ -81,8 +92,10 @@ Send each reviewer the site URL and **their own** access code from the `Reviewer
 
 **Screening → Refresh summary & agreement** builds:
 
-- `Summary`: both decisions per record, reasons, notes, and a status (`Agree: …`, `Conflict`, `Pending`)
-- `Agreement`: counts, percent agreement and Cohen's kappa (with and without counting Maybe as Include)
+- `Summary`: the two assigned assessors' decisions per record, reasons, notes, and a status (`Agree: …`, `Conflict`, `Pending`, `Check assignment`)
+- `Agreement`: pooled counts, percent agreement and Cohen's kappa (with and without counting Maybe as Include), each assessor's workload (assigned, screened, remaining), and agreement for each assessor pair
+
+With more than two assessors the pooled kappa mixes different pairs, so treat it as an overall guide and use the per-pair table for pair-level agreement.
 
 Resolve conflicts however your protocol says (discussion or a third reviewer). That happens outside this tool.
 
@@ -90,11 +103,13 @@ Resolve conflicts however your protocol says (discussion or a third reviewer). T
 
 After editing `Code.gs`: **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**. The URL stays the same.
 
+**If you set this up with the earlier two-assessor version:** paste the new `Code.gs`, redeploy as above, reload the spreadsheet and run **Screening → 1. Set up sheets** once. That adds the `assessor_1` / `assessor_2` headers to `Records` without touching your data. Existing records with those cells blank keep being screened by your first two assessors.
+
 ## Keeping it properly blinded
 
-- The independent person must **not** be one of the two reviewers.
-- Never share the spreadsheet or the Apps Script project with a reviewer, and do not make them editors of either.
-- Give each reviewer only their own code. Codes are 64-bit random strings and wrong guesses are delayed.
+- The independent person must **not** be one of the assessors.
+- Never share the spreadsheet or the Apps Script project with an assessor, and do not make them editors of either.
+- Give each assessor only their own code. Codes are 64-bit random strings and wrong guesses are delayed.
 - The session code lives in the browser tab's session storage and is cleared when the tab closes or the reviewer clicks **Sign out**. Reviewers should not share a computer account while screening.
 - Reviewer free text (notes, reasons) is stored as plain text, so it can never run as a spreadsheet formula.
 
