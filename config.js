@@ -17,6 +17,4 @@ window.SCREENING_CONFIG = {
     'Other',
   ],
 
-  // true = reviewers must pick a reason before they can Exclude
-  REQUIRE_EXCLUSION_REASON: false,
 };
