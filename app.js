@@ -22,6 +22,7 @@
     idx: 0,
     filter: 'all',
     saving: false,
+    absOpen: false, // abstract collapsed by default; the reviewer's choice carries across records
     listEls: new Map(),
     kw: { include: [], exclude: [] },
   };
@@ -140,13 +141,16 @@
     }
 
     const abs = $('rec-abstract');
-    if (rec.abstract && rec.abstract.trim()) {
+    const hasAbs = !!(rec.abstract && rec.abstract.trim());
+    if (hasAbs) {
       abs.classList.remove('muted');
       renderHighlighted(abs, rec.abstract);
     } else {
       abs.classList.add('muted');
       abs.textContent = 'No abstract available.';
     }
+    $('abstract-toggle').hidden = !hasAbs;
+    applyAbstractState();
 
     const d = state.decisions[rec.record_id];
     document.querySelectorAll('#decision-buttons .dec').forEach((b) => {
@@ -155,6 +159,14 @@
     $('reason-select').value = d && d.reason ? d.reason : '';
     $('note-input').value = d && d.note ? d.note : '';
     $('current-decision').textContent = d ? 'Your saved decision: ' + d.decision + '. You can change it below.' : 'Not screened yet.';
+  }
+
+  function applyAbstractState() {
+    const open = state.absOpen;
+    $('rec-abstract').classList.toggle('collapsed', !open);
+    const t = $('abstract-toggle');
+    t.setAttribute('aria-expanded', String(open));
+    t.textContent = open ? 'Collapse abstract' : 'Show full abstract';
   }
 
   function renderHighlighted(el, text) {
@@ -368,6 +380,10 @@
     $('decision-buttons').addEventListener('click', (ev) => {
       const b = ev.target.closest('button[data-decision]');
       if (b) save(b.dataset.decision);
+    });
+    $('abstract-toggle').addEventListener('click', () => {
+      state.absOpen = !state.absOpen;
+      applyAbstractState();
     });
     $('prev-btn').addEventListener('click', () => goTo(state.idx - 1));
     $('next-btn').addEventListener('click', () => goTo(state.idx + 1));

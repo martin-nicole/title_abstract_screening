@@ -12,6 +12,7 @@
   <!-- Login -->
   <section id="login-view" class="login">
     <form id="login-form" class="card login-card" autocomplete="off">
+      <div class="logo" aria-hidden="true">✓</div>
       <h1 id="login-title">Title &amp; abstract screening</h1>
       <p class="muted">Enter your personal access code. Your decisions are recorded privately; the other reviewer cannot see them.</p>
       <label for="code-input">Access code</label>
@@ -28,12 +29,12 @@
   <div id="app-view" hidden>
     <header class="topbar">
       <button id="list-toggle" type="button" class="ghost list-toggle" aria-expanded="false" aria-controls="sidebar">List</button>
-      <strong id="app-title">Screening</strong>
+      <strong id="app-title" class="brand">Screening</strong>
       <div class="progress" aria-live="polite">
         <span id="progress-text">0 / 0</span>
         <div class="bar"><div id="progress-bar"></div></div>
       </div>
-      <span id="reviewer-name" class="muted"></span>
+      <span id="reviewer-name" class="chip"></span>
       <button id="logout-btn" type="button" class="ghost">Sign out</button>
     </header>
 
@@ -57,13 +58,51 @@
         </div>
 
         <div id="record-wrap">
-          <article class="card record">
-            <p class="position muted" id="rec-position"></p>
+          <!-- 1. Which record is this -->
+          <article class="card record-head">
+            <div class="rec-top">
+              <p class="position" id="rec-position"></p>
+              <div class="nav-mini">
+                <button type="button" id="prev-btn" class="ghost" aria-label="Previous record" title="Previous (←)">&larr;</button>
+                <button type="button" id="next-btn" class="ghost" aria-label="Next record" title="Next (→)">&rarr;</button>
+                <button type="button" id="next-todo-btn" class="ghost" title="Next unscreened (N)">Next unscreened <kbd>N</kbd></button>
+              </div>
+            </div>
             <h2 id="rec-title"></h2>
             <p id="rec-meta" class="meta muted"></p>
             <p id="rec-links" class="meta"></p>
-            <div id="rec-abstract" class="abstract"></div>
           </article>
+
+          <!-- 2. Decision, right under the title -->
+          <section class="card decision" aria-label="Your decision">
+            <p id="current-decision" class="current" aria-live="polite"></p>
+            <div class="buttons" id="decision-buttons">
+              <button type="button" class="dec include" data-decision="Include" aria-pressed="false"><span class="ico" aria-hidden="true">✓</span>Include <kbd>I</kbd></button>
+              <button type="button" class="dec maybe" data-decision="Maybe" aria-pressed="false"><span class="ico" aria-hidden="true">?</span>Maybe <kbd>M</kbd></button>
+              <button type="button" class="dec exclude" data-decision="Exclude" aria-pressed="false"><span class="ico" aria-hidden="true">✕</span>Exclude <kbd>E</kbd></button>
+            </div>
+            <div class="fields">
+              <label>Reason for exclusion
+                <select id="reason-select"></select>
+              </label>
+              <label>Note (optional)
+                <textarea id="note-input" rows="1" maxlength="2000" placeholder="Anything you want the independent person to see"></textarea>
+              </label>
+            </div>
+            <div class="decision-foot">
+              <p id="status-msg" class="msg" role="status" aria-live="polite"></p>
+              <label class="check"><input type="checkbox" id="auto-advance" checked> Auto-advance after saving</label>
+            </div>
+          </section>
+
+          <!-- 3. Abstract, collapsed by default -->
+          <section class="card abstract-card">
+            <div class="abs-head">
+              <h3>Abstract</h3>
+              <button type="button" id="abstract-toggle" class="ghost small" aria-expanded="false" aria-controls="rec-abstract">Show full abstract</button>
+            </div>
+            <div id="rec-abstract" class="abstract collapsed"></div>
+          </section>
 
           <details class="card keywords">
             <summary>Highlight keywords (optional, stored only in this browser)</summary>
@@ -76,30 +115,6 @@
               </label>
             </div>
           </details>
-
-          <section class="card decision" aria-label="Your decision">
-            <p id="current-decision" class="muted" aria-live="polite"></p>
-            <div class="buttons" id="decision-buttons">
-              <button type="button" class="dec include" data-decision="Include" aria-pressed="false">Include <kbd>I</kbd></button>
-              <button type="button" class="dec maybe" data-decision="Maybe" aria-pressed="false">Maybe <kbd>M</kbd></button>
-              <button type="button" class="dec exclude" data-decision="Exclude" aria-pressed="false">Exclude <kbd>E</kbd></button>
-            </div>
-            <div class="fields">
-              <label>Reason for exclusion
-                <select id="reason-select"></select>
-              </label>
-              <label>Note (optional)
-                <textarea id="note-input" rows="2" maxlength="2000" placeholder="Anything you want the independent person to see"></textarea>
-              </label>
-            </div>
-            <p id="status-msg" class="msg" role="status" aria-live="polite"></p>
-            <div class="nav">
-              <button type="button" id="prev-btn" class="ghost">&larr; Previous</button>
-              <button type="button" id="next-btn" class="ghost">Next &rarr;</button>
-              <button type="button" id="next-todo-btn" class="ghost">Next unscreened <kbd>N</kbd></button>
-              <label class="check"><input type="checkbox" id="auto-advance" checked> Auto-advance after saving</label>
-            </div>
-          </section>
         </div>
       </main>
     </div>
