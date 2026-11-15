@@ -6,7 +6,6 @@
       TITLE: 'Title & abstract screening',
       APPS_SCRIPT_URL: '',
       EXCLUSION_REASONS: [],
-      REQUIRE_EXCLUSION_REASON: false,
     },
     window.SCREENING_CONFIG || {}
   );
@@ -99,7 +98,7 @@
     sel.replaceChildren();
     const blank = document.createElement('option');
     blank.value = '';
-    blank.textContent = CFG.REQUIRE_EXCLUSION_REASON ? 'Select a reason…' : 'No reason given';
+    blank.textContent = 'Select a reason…';
     sel.appendChild(blank);
     CFG.EXCLUSION_REASONS.forEach((r) => {
       const o = document.createElement('option');
@@ -156,6 +155,7 @@
     document.querySelectorAll('#decision-buttons .dec').forEach((b) => {
       b.setAttribute('aria-pressed', d && d.decision === b.dataset.decision ? 'true' : 'false');
     });
+    $('reason-select').classList.remove('invalid');
     $('reason-select').value = d && d.reason ? d.reason : '';
     $('note-input').value = d && d.note ? d.note : '';
     $('current-decision').textContent = d ? 'Your saved decision: ' + d.decision + '. You can change it below.' : 'Not screened yet.';
@@ -284,8 +284,12 @@
     if (state.saving || !current()) return;
     const rec = current();
     const reason = decision === 'Exclude' ? $('reason-select').value : '';
-    if (decision === 'Exclude' && CFG.REQUIRE_EXCLUSION_REASON && !reason) {
-      setStatus('Please choose a reason for exclusion first.', 'error');
+    if (decision === 'Exclude' && !reason) {
+      // A reason is mandatory: nothing is saved until one is chosen
+      const sel = $('reason-select');
+      sel.classList.add('invalid');
+      sel.focus();
+      setStatus('Choose a reason for exclusion, then click Exclude again.', 'error');
       return;
     }
     const note = $('note-input').value.trim();
@@ -384,6 +388,10 @@
     $('abstract-toggle').addEventListener('click', () => {
       state.absOpen = !state.absOpen;
       applyAbstractState();
+    });
+    $('reason-select').addEventListener('change', () => {
+      $('reason-select').classList.remove('invalid');
+      if ($('reason-select').value) setStatus('');
     });
     $('prev-btn').addEventListener('click', () => goTo(state.idx - 1));
     $('next-btn').addEventListener('click', () => goTo(state.idx + 1));
