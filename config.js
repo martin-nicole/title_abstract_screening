@@ -10,12 +10,10 @@ window.SCREENING_CONFIG = {
   EXCLUSION_REASONS: [
     'Wrong population',
     'Wrong intervention / exposure',
-    'Wrong comparator',
     'Wrong outcome',
     'Wrong study design',
     'Not primary research (editorial, comment, etc.)',
     'Duplicate',
-    'Language',
     'Other',
   ],
 
