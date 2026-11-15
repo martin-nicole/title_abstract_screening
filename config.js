@@ -4,7 +4,7 @@ window.SCREENING_CONFIG = {
   TITLE: 'Title & abstract screening',
 
   // Paste the "Web app" URL from Apps Script > Deploy > Manage deployments
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzgd_a6RUw5eR7OcWjWv27L5-YuZTrOGTyd6F55xwxj78FrhEFIANLnao83-lL11JzQqg/exec',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzIxUGqhvUWyGLhHK8W_rPbqjmkMGB4dN6xAaOKYCxcyECgicR_sspzUjlyh0mAXkyOiA/exec',
 
   // Shown in the dropdown when a reviewer excludes a record
   EXCLUSION_REASONS: [
