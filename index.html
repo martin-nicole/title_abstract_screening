@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Title &amp; abstract screening</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Login -->
+  <section id="login-view" class="login">
+    <form id="login-form" class="card login-card" autocomplete="off">
+      <h1 id="login-title">Title &amp; abstract screening</h1>
+      <p class="muted">Enter your personal access code. Your decisions are recorded privately; the other reviewer cannot see them.</p>
+      <label for="code-input">Access code</label>
+      <input id="code-input" type="password" autocomplete="off" spellcheck="false" required>
+      <button type="submit" class="primary" id="login-btn">Start screening</button>
+      <p id="login-error" class="msg error" role="alert" hidden></p>
+      <p id="config-warning" class="msg error" hidden>
+        This site is not configured yet: set <code>APPS_SCRIPT_URL</code> in <code>config.js</code>.
+      </p>
+    </form>
+  </section>
+
+  <!-- App -->
+  <div id="app-view" hidden>
+    <header class="topbar">
+      <button id="list-toggle" type="button" class="ghost list-toggle" aria-expanded="false" aria-controls="sidebar">List</button>
+      <strong id="app-title">Screening</strong>
+      <div class="progress" aria-live="polite">
+        <span id="progress-text">0 / 0</span>
+        <div class="bar"><div id="progress-bar"></div></div>
+      </div>
+      <span id="reviewer-name" class="muted"></span>
+      <button id="logout-btn" type="button" class="ghost">Sign out</button>
+    </header>
+
+    <div class="layout">
+      <aside id="sidebar" class="sidebar">
+        <label for="filter-select" class="sr-only">Filter records</label>
+        <select id="filter-select">
+          <option value="all">All records</option>
+          <option value="todo">Not yet screened</option>
+          <option value="done">Screened</option>
+          <option value="Include">My includes</option>
+          <option value="Maybe">My maybes</option>
+          <option value="Exclude">My excludes</option>
+        </select>
+        <ul id="record-list" class="record-list"></ul>
+      </aside>
+
+      <main class="main">
+        <div id="empty-msg" class="card" hidden>
+          <p>No records were found. Ask the coordinator to add records to the <code>Records</code> sheet.</p>
+        </div>
+
+        <div id="record-wrap">
+          <article class="card record">
+            <p class="position muted" id="rec-position"></p>
+            <h2 id="rec-title"></h2>
+            <p id="rec-meta" class="meta muted"></p>
+            <p id="rec-links" class="meta"></p>
+            <div id="rec-abstract" class="abstract"></div>
+          </article>
+
+          <details class="card keywords">
+            <summary>Highlight keywords (optional, stored only in this browser)</summary>
+            <div class="kw-grid">
+              <label>Include terms <span class="swatch inc"></span>
+                <textarea id="kw-include" rows="2" placeholder="comma-separated, e.g. randomised, placebo"></textarea>
+              </label>
+              <label>Exclude terms <span class="swatch exc"></span>
+                <textarea id="kw-exclude" rows="2" placeholder="comma-separated, e.g. animal, in vitro"></textarea>
+              </label>
+            </div>
+          </details>
+
+          <section class="card decision" aria-label="Your decision">
+            <p id="current-decision" class="muted" aria-live="polite"></p>
+            <div class="buttons" id="decision-buttons">
+              <button type="button" class="dec include" data-decision="Include" aria-pressed="false">Include <kbd>I</kbd></button>
+              <button type="button" class="dec maybe" data-decision="Maybe" aria-pressed="false">Maybe <kbd>M</kbd></button>
+              <button type="button" class="dec exclude" data-decision="Exclude" aria-pressed="false">Exclude <kbd>E</kbd></button>
+            </div>
+            <div class="fields">
+              <label>Reason for exclusion
+                <select id="reason-select"></select>
+              </label>
+              <label>Note (optional)
+                <textarea id="note-input" rows="2" maxlength="2000" placeholder="Anything you want the independent person to see"></textarea>
+              </label>
+            </div>
+            <p id="status-msg" class="msg" role="status" aria-live="polite"></p>
+            <div class="nav">
+              <button type="button" id="prev-btn" class="ghost">&larr; Previous</button>
+              <button type="button" id="next-btn" class="ghost">Next &rarr;</button>
+              <button type="button" id="next-todo-btn" class="ghost">Next unscreened <kbd>N</kbd></button>
+              <label class="check"><input type="checkbox" id="auto-advance" checked> Auto-advance after saving</label>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
