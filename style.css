@@ -104,7 +104,6 @@ input, select, textarea {
 label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
 label > select, label > textarea { margin-top: 4px; font-weight: 400; color: var(--text); }
 textarea { resize: vertical; }
-select.invalid { border-color: var(--exclude); box-shadow: 0 0 0 3px color-mix(in srgb, var(--exclude) 25%, transparent); }
 
 .msg { min-height: 1.4em; margin: 0; font-size: 0.92rem; }
 .msg.ok { color: var(--include); font-weight: 600; }
@@ -206,7 +205,26 @@ select.invalid { border-color: var(--exclude); box-shadow: 0 0 0 3px color-mix(i
 .dec.include[aria-pressed="true"] { background: var(--include); border-color: var(--include); }
 .dec.maybe[aria-pressed="true"] { background: var(--maybe); border-color: var(--maybe); }
 .dec.exclude[aria-pressed="true"] { background: var(--exclude); border-color: var(--exclude); }
-.fields { display: grid; grid-template-columns: 1fr 1.6fr; gap: 12px; margin-top: 16px; }
+.fields { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 16px; }
+
+/* Exclusion reasons: opens when Exclude is pressed; choosing one saves the decision */
+.reason-panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 2px solid var(--exclude);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--exclude) 6%, var(--surface));
+}
+.reason-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.reason-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.reason {
+  display: flex; align-items: center; gap: 8px;
+  text-align: left; padding: 10px 12px;
+  font-weight: 500; border-radius: 10px;
+}
+.reason kbd { margin: 0; flex: none; }
+.reason:hover:not(:disabled) { border-color: var(--exclude); background: color-mix(in srgb, var(--exclude) 14%, var(--surface)); }
+.reason[aria-pressed="true"] { border-color: var(--exclude); background: color-mix(in srgb, var(--exclude) 20%, var(--surface)); font-weight: 700; }
 .decision-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
 .check { display: flex; gap: 6px; align-items: center; font-weight: 400; margin-left: auto; }
 .check input { width: auto; }
@@ -236,7 +254,7 @@ mark.hl-exc { background: var(--hl-exc); }
   .topbar button { padding: 6px 10px; white-space: nowrap; }
   #app-title, #reviewer-name { display: none; }
   .bar { width: 64px; }
-  .fields, .kw-grid { grid-template-columns: 1fr; }
+  .kw-grid, .reason-list { grid-template-columns: 1fr; }
   .main { padding: 12px; }
   .card { padding: 16px; }
   .dec { padding: 14px 6px; font-size: 1rem; flex-direction: column; gap: 2px; }

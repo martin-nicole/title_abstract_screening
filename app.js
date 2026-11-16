@@ -81,7 +81,7 @@
     $('login-view').hidden = true;
     $('app-view').hidden = false;
     $('reviewer-name').textContent = state.reviewer.name || state.reviewer.id;
-    buildReasonOptions();
+    buildReasonList();
     const empty = state.records.length === 0;
     $('empty-msg').hidden = !empty;
     $('record-wrap').hidden = empty;
@@ -93,19 +93,51 @@
     }
   }
 
-  function buildReasonOptions() {
-    const sel = $('reason-select');
-    sel.replaceChildren();
-    const blank = document.createElement('option');
-    blank.value = '';
-    blank.textContent = 'Select a reason…';
-    sel.appendChild(blank);
-    CFG.EXCLUSION_REASONS.forEach((r) => {
-      const o = document.createElement('option');
-      o.value = r;
-      o.textContent = r;
-      sel.appendChild(o);
+  /* ---------------- Exclusion reasons ---------------- */
+
+  function buildReasonList() {
+    const list = $('reason-list');
+    list.replaceChildren();
+    CFG.EXCLUSION_REASONS.forEach((r, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'reason';
+      b.dataset.reason = r;
+      b.setAttribute('aria-pressed', 'false');
+      if (i < 9) {
+        const k = document.createElement('kbd');
+        k.textContent = String(i + 1);
+        b.appendChild(k);
+      }
+      b.appendChild(document.createTextNode(r));
+      list.appendChild(b);
     });
+  }
+
+  const reasonsOpen = () => !$('reason-panel').hidden;
+
+  function openReasons() {
+    if (state.saving || !current()) return;
+    if (!CFG.EXCLUSION_REASONS.length) {
+      setStatus('No exclusion reasons are configured (see config.js).', 'error');
+      return;
+    }
+    const d = state.decisions[current().record_id];
+    const previous = d && d.decision === 'Exclude' ? d.reason : '';
+    const buttons = Array.from(document.querySelectorAll('#reason-list .reason'));
+    buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.reason === previous)));
+    setStatus('');
+    $('reason-panel').hidden = false;
+    (buttons.find((b) => b.dataset.reason === previous) || buttons[0]).focus();
+  }
+
+  function closeReasons() {
+    $('reason-panel').hidden = true;
+  }
+
+  function cancelReasons() {
+    closeReasons();
+    $('decision-buttons').querySelector('.exclude').focus();
   }
 
   function current() {
@@ -155,10 +187,19 @@
     document.querySelectorAll('#decision-buttons .dec').forEach((b) => {
       b.setAttribute('aria-pressed', d && d.decision === b.dataset.decision ? 'true' : 'false');
     });
-    $('reason-select').classList.remove('invalid');
-    $('reason-select').value = d && d.reason ? d.reason : '';
+    closeReasons();
     $('note-input').value = d && d.note ? d.note : '';
-    $('current-decision').textContent = d ? 'Your saved decision: ' + d.decision + '. You can change it below.' : 'Not screened yet.';
+    $('current-decision').textContent = d
+      ? 'Your saved decision: ' + d.decision + (d.reason ? ' (' + d.reason + ')' : '') + '. You can change it below.'
+      : 'Not screened yet.';
+  }
+
+  /** Re-apply keyword highlighting without touching the note or the reason list. */
+  function rehighlight() {
+    const rec = current();
+    if (!rec) return;
+    renderHighlighted($('rec-title'), rec.title || '(no title)');
+    if (rec.abstract && rec.abstract.trim()) renderHighlighted($('rec-abstract'), rec.abstract);
   }
 
   function applyAbstractState() {
@@ -264,7 +305,7 @@
   }
 
   function setBusy(busy) {
-    document.querySelectorAll('#decision-buttons .dec').forEach((b) => (b.disabled = busy));
+    document.querySelectorAll('#decision-buttons .dec, #reason-list .reason').forEach((b) => (b.disabled = busy));
   }
 
   /* ---------------- Navigation ---------------- */
@@ -280,16 +321,13 @@
 
   /* ---------------- Saving ---------------- */
 
-  async function save(decision) {
+  async function save(decision, reason) {
     if (state.saving || !current()) return;
     const rec = current();
-    const reason = decision === 'Exclude' ? $('reason-select').value : '';
+    reason = decision === 'Exclude' ? reason || '' : '';
     if (decision === 'Exclude' && !reason) {
-      // A reason is mandatory: nothing is saved until one is chosen
-      const sel = $('reason-select');
-      sel.classList.add('invalid');
-      sel.focus();
-      setStatus('Choose a reason for exclusion, then click Exclude again.', 'error');
+      // A reason is mandatory: show the list instead of saving
+      openReasons();
       return;
     }
     const note = $('note-input').value.trim();
@@ -354,7 +392,7 @@
         localStorage.setItem(kwKey(), JSON.stringify({ include: $('kw-include').value, exclude: $('kw-exclude').value }));
       } catch (e) { /* ignore */ }
     }
-    if (current()) renderRecord();
+    rehighlight();
   }
 
   /* ---------------- Wiring ---------------- */
@@ -383,15 +421,22 @@
     $('logout-btn').addEventListener('click', () => logout());
     $('decision-buttons').addEventListener('click', (ev) => {
       const b = ev.target.closest('button[data-decision]');
-      if (b) save(b.dataset.decision);
+      if (!b) return;
+      if (b.dataset.decision === 'Exclude') {
+        openReasons(); // choosing a reason saves the decision
+      } else {
+        closeReasons();
+        save(b.dataset.decision);
+      }
     });
+    $('reason-list').addEventListener('click', (ev) => {
+      const b = ev.target.closest('button.reason');
+      if (b) save('Exclude', b.dataset.reason);
+    });
+    $('reason-cancel').addEventListener('click', cancelReasons);
     $('abstract-toggle').addEventListener('click', () => {
       state.absOpen = !state.absOpen;
       applyAbstractState();
-    });
-    $('reason-select').addEventListener('change', () => {
-      $('reason-select').classList.remove('invalid');
-      if ($('reason-select').value) setStatus('');
     });
     $('prev-btn').addEventListener('click', () => goTo(state.idx - 1));
     $('next-btn').addEventListener('click', () => goTo(state.idx + 1));
@@ -420,12 +465,24 @@
 
     document.addEventListener('keydown', (ev) => {
       if ($('app-view').hidden || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+      if (ev.key === 'Escape' && reasonsOpen()) {
+        cancelReasons();
+        ev.preventDefault();
+        return;
+      }
       const t = ev.target;
       if (t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return;
+      if (reasonsOpen() && /^[1-9]$/.test(ev.key)) {
+        // number keys pick the matching reason, which saves the Exclude decision
+        const b = document.querySelectorAll('#reason-list .reason')[Number(ev.key) - 1];
+        if (b) save('Exclude', b.dataset.reason);
+        ev.preventDefault();
+        return;
+      }
       switch (ev.key.toLowerCase()) {
-        case 'i': save('Include'); break;
-        case 'm': save('Maybe'); break;
-        case 'e': save('Exclude'); break;
+        case 'i': closeReasons(); save('Include'); break;
+        case 'm': closeReasons(); save('Maybe'); break;
+        case 'e': openReasons(); break;
         case 'arrowleft': goTo(state.idx - 1); break;
         case 'arrowright': goTo(state.idx + 1); break;
         case 'n': $('next-todo-btn').click(); break;

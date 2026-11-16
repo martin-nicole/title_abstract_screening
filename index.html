@@ -81,11 +81,15 @@
               <button type="button" class="dec maybe" data-decision="Maybe" aria-pressed="false"><span class="ico" aria-hidden="true">?</span>Maybe <kbd>M</kbd></button>
               <button type="button" class="dec exclude" data-decision="Exclude" aria-pressed="false"><span class="ico" aria-hidden="true">✕</span>Exclude <kbd>E</kbd></button>
             </div>
+            <div id="reason-panel" class="reason-panel" role="group" aria-label="Reason for exclusion" hidden>
+              <div class="reason-head">
+                <strong>Why exclude this record? Pick a reason to save.</strong>
+                <button type="button" id="reason-cancel" class="ghost small">Cancel <kbd>Esc</kbd></button>
+              </div>
+              <div id="reason-list" class="reason-list"></div>
+            </div>
             <div class="fields">
-              <label>Reason for exclusion (required to exclude)
-                <select id="reason-select"></select>
-              </label>
-              <label>Note (optional)
+              <label>Note (optional, saved with your decision)
                 <textarea id="note-input" rows="1" maxlength="2000" placeholder="Anything you want the independent person to see"></textarea>
               </label>
             </div>
