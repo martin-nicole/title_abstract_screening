@@ -122,7 +122,7 @@
     if (state.saving || !current()) return;
     const d = state.decisions[current().record_id];
     const box = $('maybe-note');
-    box.value = d && d.decision === 'Maybe' ? d.note || '' : $('note-input').value.trim();
+    box.value = d && d.decision === 'Maybe' ? d.note || '' : '';
     box.classList.remove('invalid');
     $('maybe-error').hidden = true;
     $('reason-panel').hidden = true;
@@ -225,7 +225,6 @@
       b.setAttribute('aria-pressed', d && d.decision === b.dataset.decision ? 'true' : 'false');
     });
     closeReasons();
-    $('note-input').value = d && d.note ? d.note : '';
     $('current-decision').textContent = d
       ? 'Your saved decision: ' + d.decision + (d.reason ? ' (' + d.reason + ')' : '') + '. You can change it below.'
       : 'Not screened yet.';
@@ -367,7 +366,7 @@
       openReasons();
       return;
     }
-    let note = $('note-input').value.trim();
+    let note = ''; // only a Maybe carries a note
     if (decision === 'Maybe') {
       note = (noteOverride || '').trim();
       if (!note) {

@@ -1,6 +1,6 @@
 # Blinded title & abstract screening
 
-A small website for assessors to screen titles and abstracts independently. You can set up **any number of assessors**. **Each record is screened by two of them**, and by a **third only if the first two disagree or both say Maybe**.
+A small website for assessors to screen titles and abstracts independently. You can set up **any number of screening assessors**. **Each record is screened by two of them**, and by **one dedicated third assessor (who takes no part in the first round) only if the first two disagree or both say Maybe**.
 
 - **Assessors** open a web page (hosted free on GitHub Pages), sign in with a personal access code, and mark each record **Include / Maybe / Exclude**. They only see the records they may screen.
 - **Blinding:** an assessor's browser only ever receives their own records and *their own* decisions. Other assessors' decisions, and who they are, are never sent to it. A third assessor can't see a record at all until it needs one.
@@ -39,10 +39,10 @@ Create a new Google Sheet **with the independent person's Google account**. Do n
 **Screening → 1. Set up sheets** (approve the permissions the first time). This creates:
 
 - `Records`: one row per record
-- `Reviewers`: one row per assessor, with a randomly generated access code (it starts with `R1` and `R2`)
+- `Reviewers`: one row per person, with a randomly generated access code and a `role` column (it starts with `R1` and `R2` as screeners and `R3` as the third assessor)
 - `Decisions`: the append-only log of every decision
 
-**Add all your assessors** to `Reviewers`: type a unique ID (`R3`, `R4`, …) and a name on each new row, then run **Screening → 2. Generate missing access codes**. Any number is fine.
+**Add all your people** to `Reviewers`: type a unique ID (`R4`, `R5`, …) and a name on each new row, then run **Screening → 2. Generate missing access codes**. Any number of screeners is fine. Leave `role` blank for screeners. Put `Adjudicator` in `role` for the **one** person who is the third assessor (setup does this for `R3`).
 
 ### 4. Add the records
 Paste or import your records into `Records` with these columns:
@@ -67,14 +67,11 @@ A record **needs a third assessor** when both of the first two assessors have de
 - their decisions **differ** (for example Include vs Exclude, or Include vs Maybe), or
 - they **both said Maybe**.
 
-You choose the third assessor, in the `assessor_3` column of that record:
+The third assessor is **always the same person**: the one row in `Reviewers` whose `role` is `Adjudicator`. They are **not involved in the initial screening**: they are never given records in the first round, can't be put in `assessor_1` / `assessor_2` (such a record shows `Check assignment`), and are skipped by the automatic assignment. Nothing needs assigning for them, and `assessor_3` is ignored (menu item 4 does nothing in this mode).
 
-- **Automatic:** run **Screening → 4. Assign a third assessor where needed**. It fills `assessor_3` for every record that currently needs one, picking someone other than the first two and keeping the workload even. Run it again whenever more disagreements have come in; it never overwrites an `assessor_3` that is already filled in.
-- **By hand:** type a reviewer ID into `assessor_3`. You can also fill it in ahead of time. It has no effect until the record actually needs a third assessor.
+The third assessor **cannot see a record until it needs them**, and sees no one else's decisions. The first two assessors are never told a third assessor was involved. The third assessor's **Include or Exclude becomes the final decision**. They must **refresh the page** (or sign out and in) to see newly arrived records.
 
-The third assessor **cannot see the record until it needs them**, and sees no one else's decisions. The first two assessors are never told a third assessor was involved. The third assessor's **Include or Exclude becomes the final decision**. This needs at least three people in `Reviewers`.
-
-The third assessor must **refresh the page** (or sign out and in) to see newly arrived records, because their list grows as the first two finish.
+*Without an Adjudicator row*, the older behaviour applies: type a reviewer ID into `assessor_3`, or run **Screening → 4. Assign a third assessor where needed**.
 
 ### 5. Deploy the web app
 1. In Apps Script: **Deploy → New deployment → type: Web app**.
@@ -99,8 +96,8 @@ Send each reviewer the site URL and **their own** access code from the `Reviewer
 ## Using the website
 
 - **I / M / E** keys record Include / Maybe / Exclude. **← →** move between records. **N** jumps to the next unscreened record.
-- **Exclude** opens a list of exclusion reasons (set the list in `config.js`). Picking a reason saves the decision straight away; nothing is saved before that. **Esc** or Cancel closes the list without saving. With the list open, keys **1–9** pick the matching reason. Any note typed beforehand is saved with the decision. The backend also refuses an Exclude without a reason.
-- **Maybe** opens a note box. A note explaining the uncertainty is required, and nothing is saved until one is written (**Ctrl/⌘ + Enter** or *Save Maybe*; **Esc** cancels). The backend also refuses a Maybe without a note.
+- **Exclude** opens a list of exclusion reasons (set the list in `config.js`). Picking a reason saves the decision straight away; nothing is saved before that. **Esc** or Cancel closes the list without saving. With the list open, keys **1–9** pick the matching reason. The backend also refuses an Exclude without a reason.
+- **Maybe** opens a note box (the only place a note is written). A note explaining the uncertainty is required, and nothing is saved until one is written (**Ctrl/⌘ + Enter** or *Save Maybe*; **Esc** cancels). The backend also refuses a Maybe without a note.
 - A reviewer can change an earlier decision. Every change is added to the `Decisions` log with a timestamp, and the latest one counts.
 - Optional keyword highlighting is stored only in the reviewer's own browser.
 
@@ -117,7 +114,7 @@ Send each reviewer the site URL and **their own** access code from the `Reviewer
 |---|---|---|
 | `Pending` | The first two haven't both decided yet | blank |
 | `Agree: Include` / `Agree: Exclude` | First two agree | that decision |
-| `Conflict: needs 3rd assessor` / `Both Maybe: needs 3rd assessor` | A third assessor is needed but none is assigned. If `(check assessor_3)` is shown, what is in `assessor_3` is invalid | blank |
+| `Conflict: needs 3rd assessor` / `Both Maybe: needs 3rd assessor` | A third assessor is needed but there is none (no `Adjudicator` in `Reviewers`, and no valid `assessor_3`) | blank |
 | `…: awaiting 3rd assessor` | Third assessor assigned, hasn't decided | blank |
 | `Resolved by 3rd: Include` / `Resolved by 3rd: Exclude` | The third assessor decided | the third's decision |
 | `…: 3rd said Maybe (discuss)` | The third assessor also said Maybe. This needs a decision outside the tool | blank |
