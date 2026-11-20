@@ -215,6 +215,19 @@ textarea { resize: vertical; }
   border-radius: 12px;
   background: color-mix(in srgb, var(--exclude) 6%, var(--surface));
 }
+/* Maybe: a note is required; opens when Maybe is pressed */
+.maybe-panel {
+  margin-top: 14px;
+  padding: 14px;
+  border: 2px solid var(--maybe);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--maybe) 7%, var(--surface));
+}
+.maybe-panel textarea { margin-top: 4px; }
+.maybe-panel textarea.invalid { border-color: var(--exclude); box-shadow: 0 0 0 3px color-mix(in srgb, var(--exclude) 25%, transparent); }
+.maybe-panel .msg { margin-top: 8px; }
+.maybe-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.maybe-foot .hint { font-size: 0.8rem; color: var(--muted); }
 .reason-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
 .reason-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
 .reason {

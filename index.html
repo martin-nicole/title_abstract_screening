@@ -88,6 +88,19 @@
               </div>
               <div id="reason-list" class="reason-list"></div>
             </div>
+            <div id="maybe-panel" class="maybe-panel" role="group" aria-label="Note for Maybe" hidden>
+              <div class="reason-head">
+                <strong>Why are you unsure? A note is required to save a Maybe.</strong>
+                <button type="button" id="maybe-cancel" class="ghost small">Cancel <kbd>Esc</kbd></button>
+              </div>
+              <label class="sr-only" for="maybe-note">Note for Maybe</label>
+              <textarea id="maybe-note" rows="3" maxlength="2000" placeholder="What makes this record uncertain, or what would you need to check?"></textarea>
+              <p id="maybe-error" class="msg error" role="alert" hidden>Please write a note before saving a Maybe.</p>
+              <div class="maybe-foot">
+                <span class="hint">Ctrl/⌘ + Enter to save</span>
+                <button type="button" id="maybe-save" class="primary">Save Maybe</button>
+              </div>
+            </div>
             <div class="fields">
               <label>Note (optional, saved with your decision)
                 <textarea id="note-input" rows="1" maxlength="2000" placeholder="Anything you want the independent person to see"></textarea>

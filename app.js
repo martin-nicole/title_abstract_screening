@@ -116,7 +116,43 @@
 
   const reasonsOpen = () => !$('reason-panel').hidden;
 
+  const maybeOpen = () => !$('maybe-panel').hidden;
+
+  function openMaybe() {
+    if (state.saving || !current()) return;
+    const d = state.decisions[current().record_id];
+    const box = $('maybe-note');
+    box.value = d && d.decision === 'Maybe' ? d.note || '' : $('note-input').value.trim();
+    box.classList.remove('invalid');
+    $('maybe-error').hidden = true;
+    $('reason-panel').hidden = true;
+    setStatus('');
+    $('maybe-panel').hidden = false;
+    box.focus();
+  }
+
+  function closeMaybe() {
+    $('maybe-panel').hidden = true;
+  }
+
+  function cancelMaybe() {
+    closeMaybe();
+    $('decision-buttons').querySelector('.maybe').focus();
+  }
+
+  function submitMaybe() {
+    const note = $('maybe-note').value.trim();
+    if (!note) {
+      $('maybe-note').classList.add('invalid');
+      $('maybe-error').hidden = false;
+      $('maybe-note').focus();
+      return;
+    }
+    save('Maybe', '', note);
+  }
+
   function openReasons() {
+    closeMaybe();
     if (state.saving || !current()) return;
     if (!CFG.EXCLUSION_REASONS.length) {
       setStatus('No exclusion reasons are configured (see config.js).', 'error');
@@ -132,6 +168,7 @@
   }
 
   function closeReasons() {
+    closeMaybe();
     $('reason-panel').hidden = true;
   }
 
@@ -305,7 +342,7 @@
   }
 
   function setBusy(busy) {
-    document.querySelectorAll('#decision-buttons .dec, #reason-list .reason').forEach((b) => (b.disabled = busy));
+    document.querySelectorAll('#decision-buttons .dec, #reason-list .reason, #maybe-save').forEach((b) => (b.disabled = busy));
   }
 
   /* ---------------- Navigation ---------------- */
@@ -321,7 +358,7 @@
 
   /* ---------------- Saving ---------------- */
 
-  async function save(decision, reason) {
+  async function save(decision, reason, noteOverride) {
     if (state.saving || !current()) return;
     const rec = current();
     reason = decision === 'Exclude' ? reason || '' : '';
@@ -330,7 +367,15 @@
       openReasons();
       return;
     }
-    const note = $('note-input').value.trim();
+    let note = $('note-input').value.trim();
+    if (decision === 'Maybe') {
+      note = (noteOverride || '').trim();
+      if (!note) {
+        // A note is mandatory: show the note box instead of saving
+        openMaybe();
+        return;
+      }
+    }
 
     state.saving = true;
     setBusy(true);
@@ -340,6 +385,12 @@
       if (!res.ok) {
         if (res.error === 'invalid_code') {
           logout('Your session is no longer valid. Please sign in again.');
+          return;
+        }
+        if (res.error === 'note_required') {
+          openMaybe();
+          $('maybe-note').classList.add('invalid');
+          $('maybe-error').hidden = false;
           return;
         }
         throw new Error(res.error || 'save failed');
@@ -424,9 +475,25 @@
       if (!b) return;
       if (b.dataset.decision === 'Exclude') {
         openReasons(); // choosing a reason saves the decision
+      } else if (b.dataset.decision === 'Maybe') {
+        openMaybe(); // saving needs a note
       } else {
         closeReasons();
         save(b.dataset.decision);
+      }
+    });
+    $('maybe-save').addEventListener('click', submitMaybe);
+    $('maybe-cancel').addEventListener('click', cancelMaybe);
+    $('maybe-note').addEventListener('input', () => {
+      if ($('maybe-note').value.trim()) {
+        $('maybe-note').classList.remove('invalid');
+        $('maybe-error').hidden = true;
+      }
+    });
+    $('maybe-note').addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) {
+        ev.preventDefault();
+        submitMaybe();
       }
     });
     $('reason-list').addEventListener('click', (ev) => {
@@ -465,6 +532,11 @@
 
     document.addEventListener('keydown', (ev) => {
       if ($('app-view').hidden || ev.ctrlKey || ev.metaKey || ev.altKey) return;
+      if (ev.key === 'Escape' && maybeOpen()) {
+        cancelMaybe();
+        ev.preventDefault();
+        return;
+      }
       if (ev.key === 'Escape' && reasonsOpen()) {
         cancelReasons();
         ev.preventDefault();
@@ -481,7 +553,7 @@
       }
       switch (ev.key.toLowerCase()) {
         case 'i': closeReasons(); save('Include'); break;
-        case 'm': closeReasons(); save('Maybe'); break;
+        case 'm': openMaybe(); break;
         case 'e': openReasons(); break;
         case 'arrowleft': goTo(state.idx - 1); break;
         case 'arrowright': goTo(state.idx + 1); break;
