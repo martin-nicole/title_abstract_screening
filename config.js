@@ -4,7 +4,7 @@ window.SCREENING_CONFIG = {
   TITLE: 'Title & abstract screening',
 
   // Paste the "Web app" URL from Apps Script > Deploy > Manage deployments
-  APPS_SCRIPT_URL: 'PASTE_YOUR_WEB_APP_URL_HERE',
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzIxUGqhvUWyGLhHK8W_rPbqjmkMGB4dN6xAaOKYCxcyECgicR_sspzUjlyh0mAXkyOiA/exec',
 
   // Shown to reviewers in a collapsible box between the decision buttons and the abstract.
   // Edit the wording freely; a part with no text and no items is hidden, and if both are empty the box is hidden.
