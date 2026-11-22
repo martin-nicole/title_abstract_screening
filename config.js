@@ -10,17 +10,17 @@ window.SCREENING_CONFIG = {
   // Edit the wording freely; a part with no text and no items is hidden, and if both are empty the box is hidden.
   CRITERIA: {
     inclusion: {
-      intro: 'Eligible articles are accepted protocols of systematic reviews of health interventions with the following characteristics:',
       items: [
+        'protocols of systematic reviews',
+        'health interventions',
         'with or without planned meta-analyses',
         'regardless of inclusion of randomised trials and/or non-randomised studies',
         'plan to assess efficacy, effectiveness and/or safety outcomes.',
       ],
     },
     exclusion: {
-      intro: 'Not eligible for inclusion due to specific methodology or aims other than to inform clinical decision making or health policy:',
-      items: [
-        'protocols for other types of systematic reviews as per typology by Cochrane (reviews of diagnostic test accuracy, reviews of prognosis, overviews of reviews and reviews of methodology)',
+       items: [
+        'protocols for other types of systematic reviews (diagnostic test accuracy, prognosis, overviews of reviews and reviews of methodology)',
         'protocols for systematic reviews for the assessment of prevalence or incidence, with a focus on genetic topics or medical education',
         'for scoping reviews, qualitative and mixed-methods reviews, realist reviews, individual patient data or living SRs',
         'that are an amendment to a previously published version or a planned update of a previously published completed systematic review (both as stated in the accepted manuscript)',
