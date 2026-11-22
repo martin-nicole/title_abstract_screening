@@ -17,6 +17,7 @@
     code: null,
     reviewer: null,
     records: [],
+    earlier: {}, // third assessor only: record_id -> the first two assessments
     decisions: {}, // this reviewer's own decisions only: record_id -> {decision, reason, note}
     idx: 0,
     filter: 'all',
@@ -56,6 +57,7 @@
     state.reviewer = res.reviewer;
     state.records = res.records;
     state.decisions = res.decisions || {};
+    state.earlier = res.earlier || {};
     try { sessionStorage.setItem(SESSION_KEY, code); } catch (e) { /* ignore */ }
     loadKeywords();
     showApp();
@@ -225,9 +227,30 @@
       b.setAttribute('aria-pressed', d && d.decision === b.dataset.decision ? 'true' : 'false');
     });
     closeReasons();
+    renderEarlier(rec);
     $('current-decision').textContent = d
       ? 'Your saved decision: ' + d.decision + (d.reason ? ' (' + d.reason + ')' : '') + '. You can change it below.'
       : 'Not screened yet.';
+  }
+
+  function renderEarlier(rec) {
+    const list = $('earlier-list');
+    list.textContent = '';
+    const items = state.earlier[rec.record_id] || [];
+    items.forEach((a) => {
+      const li = document.createElement('li');
+      const head = document.createElement('strong');
+      head.textContent = a.label + ': ' + a.decision + (a.reason ? ' (' + a.reason + ')' : '');
+      li.appendChild(head);
+      if (a.note) {
+        const n = document.createElement('div');
+        n.className = 'earlier-note';
+        n.textContent = a.note;
+        li.appendChild(n);
+      }
+      list.appendChild(li);
+    });
+    $('earlier').hidden = !items.length;
   }
 
   /** Re-apply keyword highlighting without touching the note or the reason list. */

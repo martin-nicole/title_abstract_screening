@@ -215,6 +215,11 @@ textarea { resize: vertical; }
   border-radius: 12px;
   background: color-mix(in srgb, var(--exclude) 6%, var(--surface));
 }
+/* Earlier assessments, shown only to a third assessor */
+.earlier { margin: 14px 0 0; padding: 8px 12px; border: 1px solid var(--border, #d0d5dd); border-left: 4px solid var(--primary); border-radius: 10px; background: color-mix(in srgb, var(--primary) 6%, var(--surface)); }
+.earlier-title { margin: 0 0 4px; font-size: 0.9rem; font-weight: 600; }
+.earlier ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px 16px; }
+.earlier-note { margin-top: 2px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--muted); font-size: 0.92rem; }
 /* Maybe: a note is required; opens when Maybe is pressed */
 .maybe-panel {
   margin-top: 14px;

@@ -1,9 +1,9 @@
 # Blinded title & abstract screening
 
-A small website for assessors to screen titles and abstracts independently. You can set up **any number of screening assessors**. **Each record is screened by two of them**, and by **one dedicated third assessor (who takes no part in the first round) only if the first two disagree or both say Maybe**.
+A small website for assessors to screen titles and abstracts independently. You can set up **any number of assessors**. **Each record is screened by two of them**, and by **a third only if the first two disagree or both say Maybe**. The third can be any assessor who is not one of that record's first two.
 
 - **Assessors** open a web page (hosted free on GitHub Pages), sign in with a personal access code, and mark each record **Include / Maybe / Exclude**. They only see the records they may screen.
-- **Blinding:** an assessor's browser only ever receives their own records and *their own* decisions. Other assessors' decisions, and who they are, are never sent to it. A third assessor can't see a record at all until it needs one.
+- **Blinding:** an assessor's browser only ever receives their own records and *their own* decisions. The one exception is a third assessor, who also receives the first two assessments for the records they are deciding (unnamed). No one else's decisions, and nobody's identity, are sent. A third assessor can't see a record at all until it needs one, and then also sees the first two assessments (without names).
 - **Results** are written to a Google Sheet owned by an **independent person**, who is the only one with access. They can see each record's decisions side by side, the third assessor's resolution, a final decision, workload, percent agreement and Cohen's kappa.
 
 ```
@@ -39,10 +39,10 @@ Create a new Google Sheet **with the independent person's Google account**. Do n
 **Screening → 1. Set up sheets** (approve the permissions the first time). This creates:
 
 - `Records`: one row per record
-- `Reviewers`: one row per person, with a randomly generated access code and a `role` column (it starts with `R1` and `R2` as screeners and `R3` as the third assessor)
+- `Reviewers`: one row per person, with a randomly generated access code (it starts with `R1`, `R2` and `R3`)
 - `Decisions`: the append-only log of every decision
 
-**Add all your people** to `Reviewers`: type a unique ID (`R4`, `R5`, …) and a name on each new row, then run **Screening → 2. Generate missing access codes**. Any number of screeners is fine. Leave `role` blank for screeners. Put `Adjudicator` in `role` for the **one** person who is the third assessor (setup does this for `R3`).
+**Add all your assessors** to `Reviewers`: type a unique ID (`R4`, `R5`, …) and a name on each new row, then run **Screening → 2. Generate missing access codes**. Any number is fine. (If you used the earlier version with a `role` column, it is no longer used and can be deleted.)
 
 ### 4. Add the records
 Paste or import your records into `Records` with these columns:
@@ -67,11 +67,14 @@ A record **needs a third assessor** when both of the first two assessors have de
 - their decisions **differ** (for example Include vs Exclude, or Include vs Maybe), or
 - they **both said Maybe**.
 
-The third assessor is **always the same person**: the one row in `Reviewers` whose `role` is `Adjudicator`. They are **not involved in the initial screening**: they are never given records in the first round, can't be put in `assessor_1` / `assessor_2` (such a record shows `Check assignment`), and are skipped by the automatic assignment. Nothing needs assigning for them, and `assessor_3` is ignored (menu item 4 does nothing in this mode).
+The third assessor can be **any reviewer who is not the first or second assessor of that record**. They may be a first or second assessor on other records. Choose them in the `assessor_3` column:
 
-The third assessor **cannot see a record until it needs them**, and sees no one else's decisions. The first two assessors are never told a third assessor was involved. The third assessor's **Include or Exclude becomes the final decision**. They must **refresh the page** (or sign out and in) to see newly arrived records.
+- **Automatic:** run **Screening → 4. Assign a third assessor where needed**. It fills `assessor_3` for every record that currently needs one, picking someone outside that record's first two and keeping the workload even. Run it again whenever more disagreements have come in; it never overwrites an `assessor_3` that is already filled in.
+- **By hand:** type a reviewer ID into `assessor_3`. You can fill it in ahead of time. It has no effect until the record actually needs a third assessor.
 
-*Without an Adjudicator row*, the older behaviour applies: type a reviewer ID into `assessor_3`, or run **Screening → 4. Assign a third assessor where needed**.
+The third assessor **cannot see a record until it needs them**. When it does, they **see the first two assessments** (decision, reason and note) in an "Earlier assessments" box, labelled *Assessor 1* and *Assessor 2* with no names. They see nothing else about the others. The first two assessors are never shown the third's decision or told a third assessor was involved. The third assessor's **Include or Exclude becomes the final decision**. This needs at least three people in `Reviewers`.
+
+The third assessor must **refresh the page** (or sign out and in) to see newly arrived records, because their list grows as the first two finish.
 
 ### 5. Deploy the web app
 1. In Apps Script: **Deploy → New deployment → type: Web app**.
@@ -114,7 +117,7 @@ Send each reviewer the site URL and **their own** access code from the `Reviewer
 |---|---|---|
 | `Pending` | The first two haven't both decided yet | blank |
 | `Agree: Include` / `Agree: Exclude` | First two agree | that decision |
-| `Conflict: needs 3rd assessor` / `Both Maybe: needs 3rd assessor` | A third assessor is needed but there is none (no `Adjudicator` in `Reviewers`, and no valid `assessor_3`) | blank |
+| `Conflict: needs 3rd assessor` / `Both Maybe: needs 3rd assessor` | A third assessor is needed but none is assigned. If `(check assessor_3)` is shown, what is in `assessor_3` is invalid | blank |
 | `…: awaiting 3rd assessor` | Third assessor assigned, hasn't decided | blank |
 | `Resolved by 3rd: Include` / `Resolved by 3rd: Exclude` | The third assessor decided | the third's decision |
 | `…: 3rd said Maybe (discuss)` | The third assessor also said Maybe. This needs a decision outside the tool | blank |
@@ -135,7 +138,7 @@ After editing `Code.gs`: **Deploy → Manage deployments → ✏️ Edit → Ver
 The spreadsheet menu runs the script **as saved**. The website runs the version **as deployed**. They can differ, so check both:
 
 1. **What the saved script does.** Run **Screening → Check who sees which records**. The `Assignment check` tab lists how many records each assessor can see right now, and flags any record where both assessor cells are blank (then the first two assessors see it), the assignment is invalid, or the third assessor is invalid or held back.
-2. **What the website is running.** Open your web app URL (the one in `config.js`) in a browser tab. You should see `"version":"assign-4"`.
+2. **What the website is running.** Open your web app URL (the one in `config.js`) in a browser tab. You should see `"version":"assign-5"`.
    - No `version` at all, or an older one: the deployed copy is stale. Use **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**.
    - If you used **New deployment** instead, you now have a *different* URL. Put that new URL in `config.js` and push it to GitHub.
 3. After fixing, each assessor should **Sign out** and sign in again. Their record count should match the `Assignment check` tab.
