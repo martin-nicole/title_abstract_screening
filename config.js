@@ -4,17 +4,43 @@ window.SCREENING_CONFIG = {
   TITLE: 'Title & abstract screening',
 
   // Paste the "Web app" URL from Apps Script > Deploy > Manage deployments
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbzIxUGqhvUWyGLhHK8W_rPbqjmkMGB4dN6xAaOKYCxcyECgicR_sspzUjlyh0mAXkyOiA/exec',
+  APPS_SCRIPT_URL: 'PASTE_YOUR_WEB_APP_URL_HERE',
 
-  // Shown in the dropdown when a reviewer excludes a record
+  // Shown to reviewers in a collapsible box between the decision buttons and the abstract.
+  // Edit the wording freely; a part with no text and no items is hidden, and if both are empty the box is hidden.
+  CRITERIA: {
+    inclusion: {
+      intro: 'Eligible articles are accepted protocols of systematic reviews of health interventions with the following characteristics:',
+      items: [
+        'with or without planned meta-analyses',
+        'regardless of inclusion of randomised trials and/or non-randomised studies',
+        'plan to assess efficacy, effectiveness and/or safety outcomes.',
+      ],
+    },
+    exclusion: {
+      intro: 'Not eligible for inclusion due to specific methodology or aims other than to inform clinical decision making or health policy:',
+      items: [
+        'protocols for other types of systematic reviews as per typology by Cochrane (reviews of diagnostic test accuracy, reviews of prognosis, overviews of reviews and reviews of methodology)',
+        'protocols for systematic reviews for the assessment of prevalence or incidence, with a focus on genetic topics or medical education',
+        'for scoping reviews, qualitative and mixed-methods reviews, realist reviews, individual patient data or living SRs',
+        'that are an amendment to a previously published version or a planned update of a previously published completed systematic review (both as stated in the accepted manuscript)',
+        'with a planned network meta-analysis',
+        'that underwent an expedited review process due to funder peer-review',
+      ],
+    },
+  },
+
+  // A reason is mandatory to Exclude a record; reviewers pick one from this list.
+  // Keep at least one entry, otherwise records cannot be excluded.
   EXCLUSION_REASONS: [
     'Wrong population',
     'Wrong intervention / exposure',
+    'Wrong comparator',
     'Wrong outcome',
     'Wrong study design',
     'Not primary research (editorial, comment, etc.)',
     'Duplicate',
+    'Language',
     'Other',
   ],
-
 };

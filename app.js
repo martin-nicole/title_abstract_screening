@@ -6,6 +6,27 @@
       TITLE: 'Title & abstract screening',
       APPS_SCRIPT_URL: '',
       EXCLUSION_REASONS: [],
+      CRITERIA: {
+        inclusion: {
+          intro: 'Eligible articles are accepted protocols of systematic reviews of health interventions with the following characteristics:',
+          items: [
+            'with or without planned meta-analyses',
+            'regardless of inclusion of randomised trials and/or non-randomised studies',
+            'plan to assess efficacy, effectiveness and/or safety outcomes.',
+          ],
+        },
+        exclusion: {
+          intro: 'Not eligible for inclusion due to specific methodology or aims other than to inform clinical decision making or health policy:',
+          items: [
+            'protocols for other types of systematic reviews as per typology by Cochrane (reviews of diagnostic test accuracy, reviews of prognosis, overviews of reviews and reviews of methodology)',
+            'protocols for systematic reviews for the assessment of prevalence or incidence, with a focus on genetic topics or medical education',
+            'for scoping reviews, qualitative and mixed-methods reviews, realist reviews, individual patient data or living SRs',
+            'that are an amendment to a previously published version or a planned update of a previously published completed systematic review (both as stated in the accepted manuscript)',
+            'with a planned network meta-analysis',
+            'that underwent an expedited review process due to funder peer-review',
+          ],
+        },
+      },
     },
     window.SCREENING_CONFIG || {}
   );
@@ -586,11 +607,45 @@
     });
   }
 
+  function renderCriteria() {
+    const body = $('criteria-body');
+    body.textContent = '';
+    const parts = [['inclusion', 'Inclusion criteria', 'inc'], ['exclusion', 'Exclusion criteria', 'exc']];
+    parts.forEach(([key, label, cls]) => {
+      const c = (CFG.CRITERIA || {})[key];
+      const items = c && Array.isArray(c.items) ? c.items.filter(Boolean) : [];
+      const intro = c && c.intro ? String(c.intro) : '';
+      if (!items.length && !intro) return;
+      const sec = document.createElement('section');
+      sec.className = 'crit ' + cls;
+      const h = document.createElement('h4');
+      h.textContent = label;
+      sec.appendChild(h);
+      if (intro) {
+        const p = document.createElement('p');
+        p.textContent = intro;
+        sec.appendChild(p);
+      }
+      if (items.length) {
+        const ul = document.createElement('ul');
+        items.forEach((t) => {
+          const li = document.createElement('li');
+          li.textContent = t;
+          ul.appendChild(li);
+        });
+        sec.appendChild(ul);
+      }
+      body.appendChild(sec);
+    });
+    $('criteria').hidden = !body.children.length;
+  }
+
   async function start() {
     document.title = CFG.TITLE;
     $('login-title').textContent = CFG.TITLE;
     $('app-title').textContent = CFG.TITLE;
     wire();
+    renderCriteria();
     if (!isConfigured()) {
       $('config-warning').hidden = false;
       $('login-btn').disabled = true;

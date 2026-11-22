@@ -76,6 +76,28 @@ The third assessor **cannot see a record until it needs them**. When it does, th
 
 The third assessor must **refresh the page** (or sign out and in) to see newly arrived records, because their list grows as the first two finish.
 
+### 4d. Unassign and reassign (if your reviewers change)
+Two menu items clear assignments that nobody has acted on yet, so you can reassign them with items 3 and 4:
+
+- **Unassign records not yet assessed (all):** records with no decisions from anyone lose `assessor_1`, `assessor_2` and `assessor_3`. On records that already have decisions, a third assessor who hasn't decided yet is removed (run item 4 to pick another).
+- **Unassign one reviewer's records not yet assessed:** enter a reviewer ID (for example someone who is leaving).
+  - Records nobody has started go back to the unassigned pool.
+  - Where that reviewer was the third assessor and hasn't decided, `assessor_3` is cleared.
+  - If the other first-round assessor has already decided, the record is left alone and the message tells you how many, so you can change those by hand.
+
+Anything already assessed by the person concerned is never changed, and no decision is ever deleted.
+
+### 4e. Take a reviewer off
+Use **Screening → Take a reviewer off (no new assignments)** and enter the reviewer ID. This:
+
+- marks them `Inactive` in a new `status` column of `Reviewers` (you can also type `Inactive` there yourself; blank means active),
+- stops them signing in,
+- never gives them new records, as a first or a third assessor (menu items 3 and 4 skip them),
+- releases the records they have not assessed (same rules as 4d), and
+- **keeps everything they already assessed**: their decisions stay in `Decisions` and `Summary`, and the records stay assigned to them.
+
+Then run menu items 3 and 4 to reassign what was released. Run **1. Set up sheets** once first if your `Reviewers` sheet has no `status` column. A record where the departed person hasn't assessed but the other assessor has is left for you to change by hand, and a hand-typed `assessor_3` who is inactive is treated as invalid. To bring someone back, clear their `status` cell.
+
 ### 5. Deploy the web app
 1. In Apps Script: **Deploy → New deployment → type: Web app**.
 2. **Execute as: Me**. **Who has access: Anyone**.
@@ -101,6 +123,7 @@ Send each reviewer the site URL and **their own** access code from the `Reviewer
 - **I / M / E** keys record Include / Maybe / Exclude. **← →** move between records. **N** jumps to the next unscreened record.
 - **Exclude** opens a list of exclusion reasons (set the list in `config.js`). Picking a reason saves the decision straight away; nothing is saved before that. **Esc** or Cancel closes the list without saving. With the list open, keys **1–9** pick the matching reason. The backend also refuses an Exclude without a reason.
 - **Maybe** opens a note box (the only place a note is written). A note explaining the uncertainty is required, and nothing is saved until one is written (**Ctrl/⌘ + Enter** or *Save Maybe*; **Esc** cancels). The backend also refuses a Maybe without a note.
+- A collapsible **Inclusion & exclusion criteria** box sits between the decision buttons and the abstract. Its wording comes from `CRITERIA` in `config.js` (both the inclusion and exclusion criteria are pre-filled; an empty part is hidden). If your `config.js` has no `CRITERIA`, the built-in criteria are shown.
 - A reviewer can change an earlier decision. Every change is added to the `Decisions` log with a timestamp, and the latest one counts.
 - Optional keyword highlighting is stored only in the reviewer's own browser.
 
@@ -138,7 +161,7 @@ After editing `Code.gs`: **Deploy → Manage deployments → ✏️ Edit → Ver
 The spreadsheet menu runs the script **as saved**. The website runs the version **as deployed**. They can differ, so check both:
 
 1. **What the saved script does.** Run **Screening → Check who sees which records**. The `Assignment check` tab lists how many records each assessor can see right now, and flags any record where both assessor cells are blank (then the first two assessors see it), the assignment is invalid, or the third assessor is invalid or held back.
-2. **What the website is running.** Open your web app URL (the one in `config.js`) in a browser tab. You should see `"version":"assign-5"`.
+2. **What the website is running.** Open your web app URL (the one in `config.js`) in a browser tab. You should see `"version":"assign-7"`.
    - No `version` at all, or an older one: the deployed copy is stale. Use **Deploy → Manage deployments → ✏️ Edit → Version: New version → Deploy**.
    - If you used **New deployment** instead, you now have a *different* URL. Put that new URL in `config.js` and push it to GitHub.
 3. After fixing, each assessor should **Sign out** and sign in again. Their record count should match the `Assignment check` tab.

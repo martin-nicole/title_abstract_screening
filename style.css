@@ -248,6 +248,18 @@ textarea { resize: vertical; }
 .check input { width: auto; }
 
 /* Abstract */
+.criteria { padding: 0; }
+.criteria > summary { cursor: pointer; padding: 12px 16px; font-weight: 600; list-style: none; display: flex; align-items: center; gap: 8px; }
+.criteria > summary::-webkit-details-marker { display: none; }
+.criteria > summary::before { content: '▸'; display: inline-block; transition: transform .15s; }
+.criteria[open] > summary::before { transform: rotate(90deg); }
+.criteria-body { padding: 0 16px 14px; display: grid; gap: 12px; }
+.crit { border-left: 4px solid var(--include); padding-left: 12px; }
+.crit.exc { border-left-color: var(--exclude); }
+.crit h4 { margin: 0 0 4px; font-size: 0.95rem; }
+.crit p { margin: 0 0 4px; }
+.crit ul { margin: 0; padding-left: 1.2em; }
+.crit li { margin: 2px 0; }
 .abstract-card { padding-top: 14px; }
 .abs-head { display: flex; align-items: center; justify-content: space-between; }
 .abs-head h3 { margin: 0; font-size: 0.8rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
