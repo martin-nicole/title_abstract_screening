@@ -188,10 +188,10 @@ textarea { resize: vertical; }
 /* Decision */
 .decision { padding-top: 16px; }
 .current { margin: 0 0 12px; font-size: 0.9rem; color: var(--muted); }
-.buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.buttons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .dec {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 16px 12px; font-size: 1.1rem; font-weight: 700;
+  padding: 16px 8px; font-size: 1.1rem; font-weight: 700; min-width: 0; white-space: nowrap;
   border: 2px solid currentColor; border-radius: 12px;
   background: color-mix(in srgb, currentColor 7%, var(--surface));
 }
@@ -274,6 +274,37 @@ mark.hl-exc { background: var(--hl-exc); }
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-left: 4px; }
 .swatch.inc { background: var(--hl-inc); }
 .swatch.exc { background: var(--hl-exc); }
+
+/* Wide screens: use the full width. Title across the top; abstract on the left; decision and criteria on the right. */
+@media (min-width: 1000px) {
+  .layout { grid-template-columns: 270px 1fr; }
+  .main { padding: 16px 24px; }
+  #record-wrap { max-width: 1500px; }
+  #record-wrap:not([hidden]) {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(360px, 1fr);
+    grid-template-areas:
+      "head head"
+      "abs  dec"
+      "abs  crit"
+      "kw   crit";
+    column-gap: 20px;
+    align-items: start;
+  }
+  #record-wrap > .card { margin-bottom: 16px; }
+  .record-head { grid-area: head; margin-bottom: 14px; }
+  .decision { grid-area: dec; }
+  .criteria { grid-area: crit; }
+  .abstract-card { grid-area: abs; }
+  .keywords { grid-area: kw; }
+  /* more room, so show a longer preview of the abstract (still collapsible) */
+  .abstract { max-width: none; font-size: 1.08rem; }
+  .abstract.collapsed { -webkit-line-clamp: 12; }
+  .record-head h2 { font-size: 1.55rem; }
+  .reason-list { grid-template-columns: 1fr; }
+  .dec { padding: 14px 6px; font-size: 1.02rem; gap: 6px; }
+  .dec kbd { display: none; }
+}
 
 @media (max-width: 800px) {
   .layout { grid-template-columns: 1fr; }
